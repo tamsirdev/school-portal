@@ -1,0 +1,27 @@
+{
+  "name": "school-portal",
+  "version": "1.0.0",
+  "description": "Full-stack school management system with role-based access, attendance tracking, exam scores, ML-powered risk prediction, and PDF report cards.",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tamsirdev/school-portal.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/tamsirdev/school-portal/issues"
+  },
+  "homepage": "https://github.com/tamsirdev/school-portal#readme",
+  "dependencies": {
+    "railway": "^3.5.2"
+  }
+}
