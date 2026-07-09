@@ -1,0 +1,75 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: school
+      POSTGRES_USER: school
+      POSTGRES_PASSWORD: school
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U school -d school"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  web:
+    build: .
+    ports:
+      - "5000:5000"
+    environment:
+      FLASK_SECRET: change-this-in-production
+      DATABASE_URL: postgresql://school:school@db:5432/school
+      CELERY_BROKER_URL: redis://redis:6379/0
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - .:/app
+    command: >
+      sh -c "flask db upgrade && gunicorn -w 4 -b 0.0.0.0:5000 --access-logfile - --reload manage:app"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/auth/login')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+  worker:
+    build: .
+    environment:
+      FLASK_SECRET: change-this-in-production
+      DATABASE_URL: postgresql://school:school@db:5432/school
+      CELERY_BROKER_URL: redis://redis:6379/0
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: celery -A app.services.celery_app worker --loglevel=info
+
+  beat:
+    build: .
+    environment:
+      FLASK_SECRET: change-this-in-production
+      DATABASE_URL: postgresql://school:school@db:5432/school
+      CELERY_BROKER_URL: redis://redis:6379/0
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: celery -A app.services.celery_app beat --loglevel=info
+
+volumes:
+  pg_data:

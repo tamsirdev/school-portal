@@ -1,0 +1,47 @@
+{% extends "layouts/base.html" %}
+{% block title %}Risk Analysis — {{ class_.name }}{% endblock %}
+{% block content %}
+<div class="flex justify-between items-center mb-6">
+  <div>
+    <h1 class="text-2xl font-bold">Risk Analysis</h1>
+    <p class="text-gray-500">{{ class_.name }} &middot; Term {{ term }}</p>
+  </div>
+  <form method="POST">
+    <input type="hidden" name="term" value="{{ term }}">
+    <button type="submit" class="bg-red-600 text-white px-5 py-2 rounded-lg text-sm font-semibold hover:bg-red-700">
+      Run Analysis
+    </button>
+  </form>
+</div>
+{% if predictions %}
+  <div class="space-y-3">
+    {% for p in predictions %}
+      {% set student = p.student %}
+      <div class="bg-white rounded-xl shadow p-5 flex items-center justify-between">
+        <div>
+          <h3 class="font-semibold">{{ student.full_name }}</h3>
+          <p class="text-xs text-gray-500">{{ student.email }}</p>
+          {% if p.top_factors %}
+            <div class="mt-2 text-xs text-gray-500">
+              {% for factor, value in p.top_factors.items() %}
+                <span class="inline-block bg-gray-100 px-2 py-0.5 rounded mr-1">{{ factor }}: {{ value }}</span>
+              {% endfor %}
+            </div>
+          {% endif %}
+        </div>
+        <div class="text-right">
+          <span class="inline-block px-3 py-1 rounded-full text-xs font-bold
+            {% if p.risk_level == 'high' %}bg-red-100 text-red-800
+            {% elif p.risk_level == 'medium' %}bg-yellow-100 text-yellow-800
+            {% else %}bg-green-100 text-green-800{% endif %}">
+            {{ p.risk_level|upper }}
+          </span>
+          <div class="text-xs text-gray-400 mt-1">{{ (p.risk_score * 100)|int }}%</div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% else %}
+  <p class="text-gray-500">No predictions yet. Click <strong>Run Analysis</strong> to generate them.</p>
+{% endif %}
+{% endblock %}

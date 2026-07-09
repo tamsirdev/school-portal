@@ -1,0 +1,24 @@
+{% extends "layouts/base.html" %}
+{% block title %}Manage Classes{% endblock %}
+{% block content %}
+<div class="flex justify-between items-center mb-6">
+  <h1 class="text-2xl font-bold">Classes</h1>
+  <a href="{{ url_for('admin.create_class') }}" class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-indigo-700">+ New Class</a>
+</div>
+<div class="bg-white rounded-xl shadow overflow-hidden">
+  <table class="w-full text-sm">
+    <thead class="bg-gray-50 text-left">
+      <tr><th class="px-4 py-3">Name</th><th class="px-4 py-3">Year</th><th class="px-4 py-3">Teacher</th></tr>
+    </thead>
+    <tbody>
+      {% for class_ in classes %}
+      <tr class="border-t">
+        <td class="px-4 py-3 font-medium">{{ class_.name }}</td>
+        <td class="px-4 py-3 text-gray-500">{{ class_.academic_year }}</td>
+        <td class="px-4 py-3">{{ class_.teacher.full_name if class_.teacher else '-' }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

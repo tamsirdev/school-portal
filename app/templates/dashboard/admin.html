@@ -1,0 +1,23 @@
+{% extends "layouts/base.html" %}
+{% block title %}Admin Dashboard{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-bold mb-6">Admin Dashboard</h1>
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
+  <div class="bg-white rounded-xl shadow p-6 text-center">
+    <div class="text-3xl font-bold text-indigo-600">{{ students }}</div>
+    <div class="text-sm text-gray-500 mt-1">Students</div>
+  </div>
+  <div class="bg-white rounded-xl shadow p-6 text-center">
+    <div class="text-3xl font-bold text-indigo-600">{{ teachers }}</div>
+    <div class="text-sm text-gray-500 mt-1">Teachers</div>
+  </div>
+  <div class="bg-white rounded-xl shadow p-6 text-center">
+    <div class="text-3xl font-bold text-indigo-600">{{ classes }}</div>
+    <div class="text-sm text-gray-500 mt-1">Classes</div>
+  </div>
+</div>
+<div class="flex gap-4">
+  <a href="{{ url_for('admin.list_users') }}" class="bg-indigo-600 text-white px-5 py-2 rounded-lg text-sm font-semibold hover:bg-indigo-700">Manage Users</a>
+  <a href="{{ url_for('admin.list_classes') }}" class="bg-indigo-600 text-white px-5 py-2 rounded-lg text-sm font-semibold hover:bg-indigo-700">Manage Classes</a>
+</div>
+{% endblock %}

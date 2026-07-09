@@ -1,0 +1,47 @@
+{% extends "layouts/base.html" %}
+{% block title %}Attendance — {{ class_.name }}{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-bold mb-2">Attendance</h1>
+<p class="text-gray-500 mb-4">{{ class_.name }} &middot; {{ class_.academic_year }}</p>
+<form method="GET" class="flex gap-2 items-center mb-6">
+  <input type="date" name="date" value="{{ date }}"
+    class="border rounded-lg px-3 py-2 text-sm">
+  <button type="submit" class="bg-gray-200 px-4 py-2 rounded-lg text-sm">Load</button>
+</form>
+<form method="POST">
+  <input type="hidden" name="date" value="{{ date }}">
+  <div class="bg-white rounded-xl shadow overflow-hidden">
+    <table class="w-full text-sm">
+      <thead class="bg-gray-50 text-left">
+        <tr>
+          <th class="px-4 py-3 font-medium">Student</th>
+          <th class="px-4 py-3 font-medium">Present</th>
+          <th class="px-4 py-3 font-medium">Absent</th>
+          <th class="px-4 py-3 font-medium">Excused</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for student in students %}
+        <tr class="border-t">
+          <td class="px-4 py-3">{{ student.full_name }}</td>
+          <td class="px-4 py-3">
+            <input type="radio" name="status_{{ student.id }}" value="present"
+              {% if records.get(student.id) and records[student.id].status == 'present' %}checked{% endif %}
+              {% if not records.get(student.id) %}checked{% endif %} required>
+          </td>
+          <td class="px-4 py-3">
+            <input type="radio" name="status_{{ student.id }}" value="absent"
+              {% if records.get(student.id) and records[student.id].status == 'absent' %}checked{% endif %}>
+          </td>
+          <td class="px-4 py-3">
+            <input type="radio" name="status_{{ student.id }}" value="excused"
+              {% if records.get(student.id) and records[student.id].status == 'excused' %}checked{% endif %}>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <button type="submit" class="mt-4 bg-indigo-600 text-white px-6 py-2 rounded-lg text-sm font-semibold hover:bg-indigo-700">Save Attendance</button>
+</form>
+{% endblock %}
