@@ -120,4 +120,61 @@ CI runs lint (ruff), tests, and Docker build on every push/PR to `main`.
 |----------|---------|-------------|
 | `FLASK_SECRET` | `dev-secret` | Flask secret key |
 | `DATABASE_URL` | `postgresql://school:school@localhost:5432/school` | Database connection string |
-| `CELERY_BROKER_URL` | `redis://localhost:6379/0` | Redis connection string |
+| `CELERY_BROKER_URL` | `redis://localhost:6379/0` | Redis connection string (falls back to `REDIS_URL`) |
+
+## Deploy to Railway
+
+### Prerequisites
+
+- [Railway](https://railway.com) account (sign up with GitHub — $5 free trial credit, no credit card required)
+
+### Steps
+
+1. **Create a Railway project**
+   - Go to [dashboard](https://railway.com/dashboard) → **+ New Project** → **Empty Project**
+
+2. **Add PostgreSQL**
+   - Click **+ New** → **Database** → **Add PostgreSQL**
+   - Railway exposes `DATABASE_URL` automatically
+
+3. **Add Redis**
+   - Click **+ New** → **Database** → **Add Redis**
+   - Railway exposes `REDIS_URL` automatically
+
+4. **Add the web service**
+   - Click **+ New** → **GitHub Repo** → select `tamsirdev/school-portal`
+   - Under **Variables**, set `FLASK_SECRET` to a random secret
+   - Add a **Reference Variable**: `DATABASE_URL` → select the PostgreSQL service
+   - Add a **Reference Variable**: `CELERY_BROKER_URL` → select the Redis service → use its `REDIS_URL`
+   - Under **Settings → Networking**, click **Generate Domain**
+   - Under **Settings → Deploy**, set **Command** to:
+     ```
+     sh -c "flask db upgrade && gunicorn -w 4 -b 0.0.0.0:5000 --access-logfile - manage:app"
+     ```
+   - Railway auto-detects the Dockerfile and builds
+
+5. **Add the Celery worker**
+   - Click **+ New** → **GitHub Repo** → same repo
+   - Same **Variables** as the web service (`FLASK_SECRET`, `DATABASE_URL`, `CELERY_BROKER_URL`)
+   - Set **Command** to:
+     ```
+     celery -A app.services.celery_app worker --loglevel=info
+     ```
+
+6. **Add the Celery beat** (scheduled risk analysis)
+   - Click **+ New** → **GitHub Repo** → same repo
+   - Same **Variables**
+   - Set **Command** to:
+     ```
+     celery -A app.services.celery_app beat --loglevel=info
+     ```
+
+7. **Seed demo data** (after all services deploy)
+   - In the Railway dashboard, open the web service → **Shell** tab
+   - Run: `python seed.py`
+
+### Notes
+
+- Railway's $5 free trial credit covers the PostgreSQL, Redis, and all three services for a small app
+- The app listens on port 5000 (Railway sets `PORT=5000` by default for Dockerfile deploys)
+- No `railway.json` needed — all config is done through the dashboard
